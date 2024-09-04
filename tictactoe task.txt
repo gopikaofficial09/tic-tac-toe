@@ -1,0 +1,105 @@
+#include <iostream>
+#include <vector>
+#include <limits> // For numeric_limits
+
+using namespace std;
+
+class TicTacToe {
+private:
+    vector<vector<char> > board;
+    char currentPlayer;
+
+public:
+    TicTacToe() : board(3, vector<char>(3, ' ')), currentPlayer('X') {}
+
+    void displayBoard() {
+        cout << "Current Board:\n";
+        for (size_t i = 0; i < board.size(); ++i) {
+            for (size_t j = 0; j < board[i].size(); ++j) {
+                cout << board[i][j];
+                if (j < board[i].size() - 1) cout << " | ";
+            }
+            cout << "\n";
+            if (i < board.size() - 1) cout << "---------\n";
+        }
+    }
+
+    bool placeMark(int row, int col) {
+        if (row >= 0 && row < 3 && col >= 0 && col < 3 && board[row][col] == ' ') {
+            board[row][col] = currentPlayer;
+            return true;
+        }
+        return false;
+    }
+
+    bool checkWin() {
+        for (int i = 0; i < 3; ++i) {
+            // Check rows and columns
+            if ((board[i][0] == currentPlayer && board[i][1] == currentPlayer && board[i][2] == currentPlayer) ||
+                (board[0][i] == currentPlayer && board[1][i] == currentPlayer && board[2][i] == currentPlayer)) {
+                return true;
+            }
+        }
+        // Check diagonals
+        return (board[0][0] == currentPlayer && board[1][1] == currentPlayer && board[2][2] == currentPlayer) ||
+               (board[0][2] == currentPlayer && board[1][1] == currentPlayer && board[2][0] == currentPlayer);
+    }
+
+    bool checkDraw() {
+        for (size_t i = 0; i < board.size(); ++i) {
+            for (size_t j = 0; j < board[i].size(); ++j) {
+                if (board[i][j] == ' ') return false;
+            }
+        }
+        return true;
+    }
+
+    void switchPlayer() {
+        currentPlayer = (currentPlayer == 'X') ? 'O' : 'X';
+    }
+
+    void playGame() {
+        while (true) {
+            displayBoard();
+            int row, col;
+            cout << "Player " << currentPlayer << ", enter your move (row and column [0-2]): ";
+            cin >> row >> col;
+
+            // Check for input validity
+            if (cin.fail() || row < 0 || row > 2 || col < 0 || col > 2) {
+                cin.clear(); // Clear the error flag
+                cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Discard invalid input
+                cout << "Invalid input. Please enter numbers between 0 and 2.\n";
+                continue;
+            }
+
+            if (placeMark(row, col)) {
+                if (checkWin()) {
+                    displayBoard();
+                    cout << "Player " << currentPlayer << " wins!\n";
+                    return;
+                }
+                if (checkDraw()) {
+                    displayBoard();
+                    cout << "It's a draw!\n";
+                    return;
+                }
+                switchPlayer();
+            } else {
+                cout << "Invalid move, try again.\n";
+            }
+        }
+    }
+};
+
+int main() {
+    char playAgain;
+    do {
+        TicTacToe game;
+        game.playGame();
+        cout << "Do you want to play again? (y/n): ";
+        cin >> playAgain;
+    } while (playAgain == 'y' || playAgain == 'Y');
+
+    return 0;
+}
